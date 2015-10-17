@@ -19,7 +19,7 @@ class Telnet extends hxnet.base.Protocol
 	 */
 	override public function dataReceived(input:Input)
 	{
-		var line = input.readLine();
+		var line = input.readAll().toString();
 
 		// strip out IAC codes
 		var buffer = "";
