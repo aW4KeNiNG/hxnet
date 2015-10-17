@@ -12,6 +12,22 @@ using StringTools;
  */
 class Telnet extends hxnet.base.Protocol
 {
+    public static inline var SE     = 0xF0;     //Subnegotiation End
+    public static inline var NOP    = 0xF1;     //No Operation
+    public static inline var DM     = 0xF2;     //Data Mark
+    public static inline var BRK    = 0xF3;     //Break
+    public static inline var IP     = 0xF4;     //Interrupt Process
+    public static inline var AO     = 0xF5;     //Abort Output
+    public static inline var AYT    = 0xF6;     //Are You There
+    public static inline var EC     = 0xF7;     //Erase Character
+    public static inline var EL     = 0xF8;     //Erase Line
+    public static inline var GA     = 0xF9;     //Go Ahead
+    public static inline var SB     = 0xFA;     //Subnegotiation
+    public static inline var WILL   = 0xFB;     //Will Perform
+    public static inline var WONT   = 0xFC;     //Won't Perform
+    public static inline var DO     = 0xFD;     //Do Perform
+    public static inline var DONT   = 0xFE;     //Don't Perform
+    public static inline var IAC    = 0xFF;     //Interpret As Command
 
 	/**
 	 * Upon receiving data this method is called
@@ -31,12 +47,12 @@ class Telnet extends hxnet.base.Protocol
 				buffer += line.substr(last, i - last);
 
 				var command = line.charCodeAt(++i);
-				if (command == 0xF1) { } // NOP
-				else if (command == 0xFA) // SB
+				if (command == NOP) { }
+				else if (command == SB)
 				{
 					var code = line.charCodeAt(++i);
 					var data = new BytesOutput();
-					while (!(line.charCodeAt(i) == IAC && line.charCodeAt(i+1) == 0xF0)) // SE
+					while (!(line.charCodeAt(i) == IAC && line.charCodeAt(i+1) == SE))
 					{
 						data.writeByte(line.charCodeAt(++i));
 					}
@@ -102,7 +118,7 @@ class Telnet extends hxnet.base.Protocol
 	 * Turns echo on/off on the remote side. Useful for password entry.
 	 * @param show Whether to show keyboard output on the remote connection.
 	 */
-	public function echo(show:Bool = true) { iacSend(show ? 0xFC : 0xFB, 0x01); }
+	public function echo(show:Bool = true) { iacSend(show ? WONT : WILL, 0x01); }
 
 	/**
 	 * Prompt the user for feedback and return answer to callback
@@ -123,11 +139,4 @@ class Telnet extends hxnet.base.Protocol
 	 * Overridable method when a line is received. Used in subclasses.
 	 */
 	private function lineReceived(line:String) { }
-
-	private static inline var WILL = 0xFB;
-	private static inline var WONT = 0xFC;
-	private static inline var DO   = 0xFD;
-	private static inline var DONT = 0xFE;
-	private static inline var IAC  = 0xFF;
-
 }
