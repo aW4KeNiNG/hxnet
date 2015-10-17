@@ -7,6 +7,7 @@ import flash.net.Socket;
 import sys.net.Host;
 import sys.net.Socket;
 #end
+import haxe.Timer;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
 import hxnet.interfaces.Protocol;
@@ -23,30 +24,54 @@ class Client implements hxnet.interfaces.Client
 		buffer = Bytes.alloc(8192);
 	}
 
-	public function connect(?hostname:String, port:Null<Int> = 12800)
+	public function connect(?hostname:String, port:Null<Int> = 12800, timeout:Null<UInt> = 0)
 	{
-		try
+        #if desktop
+        var timeoutTimer:Timer = null;
+        #end
+        try
 		{
 			client = new Socket();
+
+            #if desktop
+            if(timeout != 0)
+            {
+                timeoutTimer = Timer.delay(function():Void{
+                    client.close();
+                }, timeout);
+            }
+            #end
+
 #if flash
 			client.connect(hostname, port);
+            client.timeout = timeout;
 #else
 			if (hostname == null) hostname = Host.localhost();
+            client.setTimeout(timeout/1000);        //Don't work with Desktop, Windows at least, because of that, we use a timer
 			client.connect(new Host(hostname), port);
 			client.setBlocking(blocking);
 #end
-			// prevent recreation of array on every update
-			readSockets = [client];
-			if (protocol != null)
-			{
-				protocol.onConnect(new Connection(client));
-			}
 		}
 		catch (e:Dynamic)
 		{
 			trace(e);
 			client = null;
 		}
+
+        #if desktop
+        if(timeoutTimer != null)
+            timeoutTimer.stop();
+        #end
+
+        if(client != null)
+        {
+            // prevent recreation of array on every update
+            readSockets = [client];
+            if (protocol != null)
+            {
+                protocol.onConnect(new Connection(client));
+            }
+        }
 	}
 
 	public function update(timeout:Float=0)

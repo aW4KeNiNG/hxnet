@@ -20,7 +20,8 @@ class Client implements hxnet.interfaces.Client
 		buffer = Bytes.alloc(8192);
 	}
 
-	public function connect(?hostname:String, port:Null<Int> = 12800)
+    //TODO - timeout not implemented
+	public function connect(?hostname:String, port:Null<Int> = 12800, timeout:Null<UInt> = 0)
 	{
 		client = new UdpSocket();
 		client.setBlocking(blocking);
