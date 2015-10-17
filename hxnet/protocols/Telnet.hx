@@ -89,7 +89,10 @@ class Telnet extends hxnet.base.Protocol
 				return;
 			}
 
-			lineReceived(buffer);
+            var result = buffer.split("\n");
+            for(line in result)
+			    lineReceived(line.charCodeAt(line.length-1) == 13       //If it uses DOS end line \r\n
+                             ? line.substr(0, line.length-1) : line);
 		}
 	}
 
