@@ -120,7 +120,7 @@ class Client implements hxnet.interfaces.Client
 			catch (e:Dynamic)
 			{
 				// end of stream
-                if (Std.is(e, haxe.io.Eof) || Std.is(e, haxe.io.Error.Blocked))
+                if (Std.is(e, haxe.io.Eof) || e == haxe.io.Error.Blocked)
 				{
 					buffer.set(bytesReceived, byte);
 					break;
